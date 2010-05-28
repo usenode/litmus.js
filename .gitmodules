@@ -1,0 +1,3 @@
+[submodule "ext/pkg.js"]
+	path = ext/pkg.js
+	url = git://github.com/bbc-frameworks/pkg.js.git

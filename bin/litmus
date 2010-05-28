@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+var litmusRoot = __filename.replace(/[\\\/]bin[\\\/]litmus$/, '');
+
+var pkg = require(litmusRoot + '/ext/pkg.js/src/pkg').pkg;
+
+pkg.lib(litmusRoot + '/src', 'litmus');
+
+pkg.load(['litmus_commandline', 'node:sys'], function (cli, sys) {
+    cli.runStatic(process.ARGV, process.ENV);
+});
+
