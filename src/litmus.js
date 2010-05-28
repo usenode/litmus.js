@@ -194,12 +194,10 @@ pkg.define('litmus', function () {
 
     SuiteRun = function (suite) {
         this.suite = suite;
-        this.waitingForIdCounter = 0;
-        this.waitingFor = {};
         this.results = [];
     };
 
-    makeEventEmitter(SuiteRun);
+    makeEventEmitter(suiteRun);
 
    /**
     * @method Starts the suite running.
@@ -209,25 +207,10 @@ pkg.define('litmus', function () {
             test,
             testRun;
         while (test = iterator()) {
-            this.waitFor(test);
             testRun = test.createRun();
             testRun.on('finish');
             testRun.start();
         }
-        res.waitForFinish();
-    };
-
-   /**
-    * @private
-    * @method Add a test to those that need to finish before the suite has finished.
-    *
-    * @param {litmus.Test} test
-    *   The litmus.Test that needs to be waited for.
-    */
-
-    SuiteRun.prototype.waitFor = function (test) {
-        test.waitingForId = ++this.waitingForIdCounter;
-        this.waitingFor[this.waitingForIdCounter] = test;
     };
 
    /**
@@ -264,33 +247,6 @@ pkg.define('litmus', function () {
         delete this.waitingFor[waitingForId];
         this.addResult(res);
         if (this.allTestsStarted && ! this.testsOutstanding()) {
-            this.finish();
-        }
-    };
-
-   /**
-    * @private
-    * @method Finish the test suite if ready. Sets a timeout for async tests if there are any
-    *         outstanding, otherwise finish the test suite run.
-    */
-
-    SuiteRun.prototype.waitForFinish = function () {
-        this.allTestsStarted = true;
-        if (this.testsOutstanding()) {
-            if (! main.setTimeout) {
-                throw 'unfinished tests/suites in non-async environment (no setTimeout)';
-            }
-            var res = this;
-            this.asyncTimeout = main.setTimeout(
-                function () {
-                    delete res.asyncTimeout;
-                    res.asyncTimedOut = true;
-                    res.finish();
-                },
-                this.suite.asyncTimeout
-            );
-        }
-        else {
             this.finish();
         }
     };
@@ -785,7 +741,6 @@ pkg.define('litmus', function () {
             res.error = e + location;
             var message = 'error in "' + this.test.name + '" test - ' + (e.message || e) + location + (e.stack ? '\n' + e.stack : '');
         }
-        this.waitForFinish();
     };
 
 
@@ -992,33 +947,6 @@ pkg.define('litmus', function () {
         for (var i in this.waitingFor)
             return true;
         return false;
-    };
-
-   /**
-    * @private
-    * @method If async assertions are outstanding then set a timeout for them to ensure finish is called,
-    *         otherwise finsih the test immediately by calling finish.
-    */
-
-    TestRun.prototype.waitForFinish = function () {
-        this.syncAssertionsFinished = true;
-        if (this.asyncAssertionsOutstanding()) {
-            if (! main.setTimeout) {
-                throw 'unfinished async tests in non-async environment (no setTimeout)';
-            }
-            var res = this;
-            this.asyncTimeout = main.setTimeout(
-                function () {
-                    delete res.asyncTimeout;
-                    res.asyncTimedOut = true;
-                    res.finish();
-                },
-                this.test.asyncTimeout
-            );
-        }
-        else {
-            this.finish();
-        }
     };
 
    /**
@@ -1292,45 +1220,28 @@ pkg.define('litmus', function () {
     * @constructor A handle that is returned from the TestRun.async method and passed to it's optinal
     *              function parameter. This is used to indicate when the asynchronous tests have finished.
     *
-    * @param {TestRun} result
-    *   The test result that the asynchronous assertions are adding to.
+    * @param {TestRun} run
+    *   The test run that the asynchronous assertions are adding to.
     * @param {integer} ident
     *   A unique identifier for the AsyncHandle TODO not needed?
     * @param {String} desc
     *   The description of the async tests.
     */
 
-    AsyncHandle = function (result, ident, desc) {
-        this.test = result;
+    AsyncHandle = function (run, ident, desc) {
+        this.run    = run;
         this._ident = ident;
-        this._desc = desc;
-        this._onfinishCallbacks  = [];
+        this._desc  = desc;
     };
+
+    makeEventEmitter(AsyncHandle);
 
    /**
     * @method Indicate that a set of asynchronous tests have finished.
     */
 
     AsyncHandle.prototype.finish = function () {
-        var result = this.test,
-            callbacks = this._onfinishCallbacks;
-        for (var i = 0, l = callbacks.length; i < l; i++) {
-            callbacks[i].call(result);
-        }
-        _asyncFinished.call(result, this._ident);
-    };
-
-   /**
-    * @method Add a callback to be executed when a set of asynchronous assertions have finished -
-    *         i.e. when the finish method is called. Callbacks are invoked on the TestRun, so
-    *         you can use this to run further assertions.
-    *
-    * @param {Function} callback
-    *   The callback to run when finish is called.
-    */
-
-    AsyncHandle.prototype.onfinish = function (callback) {
-        this._onfinishCallbacks[this._onfinishCallbacks.length] = callback;
+        this._fireEvent('finish', this.run);
     };
 
    /**
