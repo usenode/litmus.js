@@ -7,7 +7,7 @@
  * @version 0.2
  */
 
-pkg.define('litmus', function () {
+pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
 
    /**
     * @namespace Classes for writing, running and formatting the results of tests and
@@ -104,7 +104,7 @@ pkg.define('litmus', function () {
     * is an instanceof a parent class, where parents are identified by following the `base`
     * property on each function (set by extend function).
     *
-    * @param {Object} o
+    * @param {Object} instance
     *   The object that we are testing the type of.
     * @param {Function} isType
     *   The constructor that we are testing the object's type against.
@@ -112,9 +112,9 @@ pkg.define('litmus', function () {
     * @returns: A boolean indicating if object is correct type.
     */
 
-    function isa (o, isType) {
-        return (o instanceof isType) ? true :
-            isType.base ? isa(o, isType.base) : false;
+    function isa (instance, isType) {
+        return (instance instanceof isType) ? true :
+            isType.base ? isa(instance, isType.base) : false;
     }
 
    /**
@@ -194,10 +194,18 @@ pkg.define('litmus', function () {
 
     SuiteRun = function (suite) {
         this.suite = suite;
-        this.results = [];
+        this.runs = [];
+        this.finished = new promise.Promise();
+        var run = this;
+        this.finished.then(function (runs) {
+            run.failed = ! (run.passed = run.runs.every(function (run) {
+                run.passed;
+                run._fireEvent('finish');
+            }));
+        });
     };
 
-    makeEventEmitter(suiteRun);
+    makeEventEmitter(SuiteRun);
 
    /**
     * @method Starts the suite running.
@@ -205,85 +213,18 @@ pkg.define('litmus', function () {
     SuiteRun.prototype.start = function () {
         var iterator = this.suite.testIterator(),
             test,
-            testRun;
+            run;
         while (test = iterator()) {
-            testRun = test.createRun();
-            testRun.on('finish');
-            testRun.start();
+            run = test.createRun();
+            this.runs.push(run);
+            run.start();
         }
-    };
-
-   /**
-    * @private
-    * @method Check if there are tests that have not finished yet.
-    *
-    * @returns A boolean, true if there are tests that have not finished.
-    */
-
-    SuiteRun.prototype.testsOutstanding = function () {
-        for (var i in this.waitingFor)
-            return true;
-        return false;
-    };
-
-   /**
-    * @private
-    * @method Indicate that a test has finished and finish the suite run if it was the last test.
-    *
-    * @param {TestRun} The result from the finished test.
-    */
-
-    SuiteRun.prototype.testFinished = function (res) {
-        var waitingForId = res.test.waitingForId;
-        if (! waitingForId) {
-            throw 'litmus: test/suite finished that has no wait id';
-        }
-        if (! this.waitingFor[waitingForId]) {
-            throw 'litmus: test/suite passed to testFinished, but suite was not waiting for it (testFinished already called?)';
-        }
-        if (this.waitingFor[waitingForId] != res.test) {
-            throw 'litmus: unexpected test/suite for wait id';
-        }
-        delete this.waitingFor[waitingForId];
-        this.addResult(res);
-        if (this.allTestsStarted && ! this.testsOutstanding()) {
-            this.finish();
-        }
-    };
-
-   /**
-    * @private
-    * @method Add a test result to the result of the suite. Marks the suite as failed
-    *         if the test result is not a success.
-    *
-    * @param {litmus.TestRun} The result of the test to add.
-    */
-
-    SuiteRun.prototype.addResult = function (res) {
-        this.results.push(res);
-        if (! res.passed) {
-            this.passed = false;
-            this.failed = true;
-        }            
-        return res.passed;
-    };
-
-   /**
-    * @private
-    * @method Determine the result of the suite and invoke onfinish callback.
-    */
-
-    SuiteRun.prototype.finish = function () {
-        if (this.finished)
-            return;
-        this.finished = true;
-        if (! ('passed' in this)) {
-            this.passed = true;
-            this.failed = false;
-        }
-        if (this.onfinish) {
-            this._fireEvent('finish');
-        }
+        var suiteRun = this;
+        promise.all(
+            this.runs.map(function (run) { return run.finished; })
+        ).then(function () {
+            suiteRun.finished.resolve();
+        });
     };
 
    /**
@@ -293,13 +234,10 @@ pkg.define('litmus', function () {
     *   A readable name for the test suite.
     * @param {Array of litmus.Test and litmus.Suite objects} tests
     *   The tests that make up the suite.
-    * @param {integer} [asyncTimeout]
-    *   The amount of time to allow async sections of the test, default 20.
     */
 
-    Suite = ns.Suite = function (name, tests, asyncTimeout) {
+    Suite = ns.Suite = function (name, tests) {
         this.name = name;
-        this.asyncTimeout = asyncTimeout || 20000; // 20 seconds
         for (var i = 0, l = tests.length; i < l; i++) {
             if (! tests[i])
                 throw 'litmus: test ' +
@@ -310,13 +248,15 @@ pkg.define('litmus', function () {
                     i +
                     ' passed to new litmus.Suite() not litmus.Test or litmus.Suite';
         }
+        // TODO - why slice? Add explanation
         this.tests = tests.slice();
     };
 
    /**
     * @method Create and reutrn a new SuiteRun for this suite.
     */
-    Suite.prototype.createRun = function () {
+ 
+   Suite.prototype.createRun = function () {
         return new SuiteRun(this);
     };
 
@@ -466,8 +406,9 @@ pkg.define('litmus', function () {
     Is = function (val, isVal, message) {
         var passed = val == isVal;
         var extra;
-        if (! passed) // TODO - quote and truncate
+        if (! passed) { // TODO - quote and truncate
             extra = ['\n    expected: ', dump(isVal), '\n         got: ', dump(val)].join('');
+        }
         arguments.callee.base.call(this, passed, message, extra);
     };
     extend(Is, Assertion);
@@ -488,8 +429,9 @@ pkg.define('litmus', function () {
     Not = function (val, notVal, message) {
         var passed = val != notVal;
         var extra;
-        if (! passed) // TODO - quote and truncate
+        if (! passed) { // TODO - quote and truncate
             extra = "got '" + val + "', expecting something else";
+        }
         arguments.callee.base.call(this, passed, message, extra);
     };
     extend(Not, Assertion);
@@ -548,8 +490,9 @@ pkg.define('litmus', function () {
     Gt = function (val, gtVal, message) {
         var passed = val > gtVal;
         var extra;
-        if (! passed)
+        if (! passed) {
             extra = "expected greater than '" + gtVal + "', got '" + val + "'";
+        }
         arguments.callee.base.call(this, passed, message, extra);
     };
     extend(Gt, Assertion);
@@ -697,7 +640,9 @@ pkg.define('litmus', function () {
         }
         else if (re) {
             passed = re.test(error.toString ? error.toString() : error);
-            if (! passed) extra = 'exception does not match regular expression';
+            if (! passed) {
+                extra = 'exception does not match regular expression';
+            }
         }
         arguments.callee.base.call(this, passed, message, extra);
     };
@@ -719,10 +664,9 @@ pkg.define('litmus', function () {
 
     TestRun = function (test) {
         this.test = test;
-        this.events = [];
-        this.waitingFor = {};
-        this.waitingIdCounter = 0;
-        this.onjoinCallbacks = {};
+        this.asyncHandles = [];
+        this.exceptions = [];
+        this.finished = new promise.Promise();
     };
 
     makeEventEmitter(TestRun);
@@ -737,12 +681,22 @@ pkg.define('litmus', function () {
             this.test.runFunc.call(this);
         }
         catch (e) {
+            // TODO clean this up
             var location = (e.fileName ? ' at ' + e.fileName + ' line ' + e.lineNumber : '');
-            res.error = e + location;
             var message = 'error in "' + this.test.name + '" test - ' + (e.message || e) + location + (e.stack ? '\n' + e.stack : '');
+            this.addException({ 'message' : message, 'location' : location });
         }
+        var run = this;
+        promise.when(
+            promise.all(this.asyncHandles.map(function (handle) {
+                return handle.finished;
+            })),
+            function () {
+                run.failed = ! (run.passed = (run.exceptions.length === 0) && run.plannedAssertionsRan());
+                run.finished.resolve();
+            }
+        );
     };
-
 
    /**
     * @method Set an exception caught running the test.
@@ -752,7 +706,7 @@ pkg.define('litmus', function () {
     */
 
     TestRun.prototype.addException = function (exception) {
-        this.exception = exception;
+        this.exceptions.push(exception);
     };
 
    /**
@@ -804,24 +758,6 @@ pkg.define('litmus', function () {
     };
 
    /**
-    * @private
-    * @method Indicate that a set of asynchronous assertions have finished, possibly finishing the test.
-    *
-    * @param {String} ident
-    *   The identifier of the async assertions that was passed into the AsyncHandle constructor.
-    */
-
-    function _asyncFinished (ident) {
-        if (! this.waitingFor[ident]) {
-            throw 'litmus: unknown ident passed to endAsync';
-        }
-        delete this.waitingFor[ident];
-        if (this.syncAssertionsFinished && ! this.asyncAssertionsOutstanding()) {
-            this.finish();
-        }
-    };
-
-   /**
     * @method Run tests inside an anonymous function asynchronously. Use either this method or startAsync.
     *
     * @param {String} desc
@@ -835,10 +771,17 @@ pkg.define('litmus', function () {
     * @returns The return value from the passed in function.
     */
     
-    TestRun.prototype.async = function (desc, func) {
-        var ident = ++this.waitingIdCounter,
-            handle = new AsyncHandle(this, ident, desc);
-        this.waitingFor[ident] = handle;
+    TestRun.prototype.async = function (desc, func, asyncTimeout) {
+        var handle = new AsyncHandle(desc, asyncTimeout || 10),
+            run = this;
+        this.asyncHandles.push(handle);
+        promise.when(handle.finished, function () {
+            this.asyncHandles = this.asyncHandles.filter(function (i) {
+                return i !== handle;
+            });
+        }, function (err) {
+            run.addException(err);
+        });
         if (func) {
             func.call(this, handle);
         }
@@ -934,40 +877,6 @@ pkg.define('litmus', function () {
             if (assertions[i].failed) total++;
         }
         return total;
-    };
-
-   /**
-    * @private
-    * @method Check if there are any async assertions still running.
-    *
-    * @returns Boolean, true if there have been calls to startAsync with no corresponding call to stopAsync.
-    */
-
-    TestRun.prototype.asyncAssertionsOutstanding = function () {
-        for (var i in this.waitingFor)
-            return true;
-        return false;
-    };
-
-   /**
-    * @private
-    * @method Calculate the test result, clear timeouts for async tests and call the onfinish event
-    *         callback. If called more than once for a particular TestRun, it becomes a no-op.
-    */
-
-    TestRun.prototype.finish = function () {
-        if (this.finished) return;
-        this.finished = true;
-        if ('asyncTimeout' in this) {
-            main.clearTimeout(this.asyncTimeout);
-            delete this.asyncTimeout;                
-        }
-        if (! ('passed' in this)) {
-            this.failed = ! (this.passed = ! this.error && this.plannedAssertionsRan() && ! this.asyncTimedOut);
-        }
-        if (this.onfinish) {
-            this.onfinish.call(this);
-        }
     };
 
    /**
@@ -1222,16 +1131,16 @@ pkg.define('litmus', function () {
     *
     * @param {TestRun} run
     *   The test run that the asynchronous assertions are adding to.
-    * @param {integer} ident
-    *   A unique identifier for the AsyncHandle TODO not needed?
     * @param {String} desc
     *   The description of the async tests.
     */
 
-    AsyncHandle = function (run, ident, desc) {
-        this.run    = run;
-        this._ident = ident;
-        this._desc  = desc;
+    AsyncHandle = function (desc, timeout) {
+        this.finished = new promise.Promise();
+        var handle = this;
+        this._timeout = setTimeout(function () {
+            handle.finished.emitError(new Error('async operation "' + desc + '" timed out after ' + timeout + ' seconds'));
+        }, timeout * 1000);
     };
 
     makeEventEmitter(AsyncHandle);
@@ -1241,7 +1150,7 @@ pkg.define('litmus', function () {
     */
 
     AsyncHandle.prototype.finish = function () {
-        this._fireEvent('finish', this.run);
+        this.finished.resolve();
     };
 
    /**
@@ -1252,14 +1161,11 @@ pkg.define('litmus', function () {
     * @param {Function} runFunc
     *   The function performs the testing. This is called as a result of calling the run method and is
     *   invoked with a TestRun object as it's invocant, which has methods to test assertions.
-    * @param {integer} [asyncTimeout]
-    *   The amount of time in milliseconds to allow for asynchronous assertions, default 10,000.
     */
 
-    Test = ns.Test = function (name, runFunc, asyncTimeout) {
+    Test = ns.Test = function (name, runFunc) {
         this.name = name;
         this.runFunc = runFunc;
-        this.asyncTimeout = asyncTimeout || 10000; // 10 seconds
     };
 
    /**
