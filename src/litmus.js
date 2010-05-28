@@ -664,6 +664,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
 
     TestRun = function (test) {
         this.test = test;
+        this.events = [];
         this.asyncHandles = [];
         this.exceptions = [];
         this.finished = new promise.Promise();
@@ -1217,15 +1218,15 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
    /**
     * @method Formats each of the sub-results in the passed in SuiteRun.
     *
-    * @param {Array} r
+    * @param {Array} buffer
     *   Buffer for collecting output.
     * @param {SuiteRun} res
     *   The SuiteRun to format.
     */
 
-    StaticFormatter.prototype.formatSuite = function (r, res) {
-        for (var i = 0, l = res.results.length; i < l; i++) {
-            this.formatSuiteOrTest(r, res.results[i]);
+    StaticFormatter.prototype.formatSuite = function (buffer, run) {
+        for (var i = 0, l = run.runs.length; i < l; i++) {
+            this.formatSuiteOrTest(buffer, run.runs[i]);
         }
     };
 

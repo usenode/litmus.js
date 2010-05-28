@@ -101,7 +101,7 @@ pkg.define('litmus_commandline', ['litmus', 'node:sys'], function (litmus, sys) 
             test = tests[i];
             pkg.load(test, function (test) {
                 var run = test.createRun();
-                run.on('finish', function () {
+                run.finished.then(function () {
                     sys.print(formatter.format(run));
                 });
                 run.start();
