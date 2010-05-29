@@ -7,7 +7,7 @@
  * @version 0.2
  */
 
-pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
+pkg.define('litmus', ['promise'], function (promise) {
 
    /**
     * @namespace Classes for writing, running and formatting the results of tests and
