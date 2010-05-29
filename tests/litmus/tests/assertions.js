@@ -9,6 +9,7 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
         var test = this;
 
         var testedTest = new litmus.Test(
+
             'test test', function () {
                 
                 this.plan(27);
@@ -37,7 +38,7 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
                 returns[r++] = this.lte(2, 1, 'lte(2, 1) false');                        
 
                 returns[r++] = this.gt(1, 2, 'gt(1, 2) false');
-                    returns[r++] = this.gt(1, 1, 'gt(1, 1) false')
+                returns[r++] = this.gt(1, 1, 'gt(1, 1) false')
                 returns[r++] = this.gt(2, 1, 'gt(2, 1) true');
 
                 returns[r++] = this.gte(1, 2, 'gte(1, 2) false');
@@ -54,28 +55,28 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
             }
         );
 
-        testedTest.run(function () {
-            
-            var res = this;
+        var run = testedTest.createRun();
 
-            test.is(res.assertions().length, 27, 'number of assertions');
-            test.nok(res.passed, 'test result with failures is a fail');
-            test.ok(res.failed, 'use fail property to check for failure');
-            test.is(res.passes(), 14, 'number of passes');
-            test.is(res.fails(), 13, 'number of fails');
+        run.finished.then(function () {
+
+            test.is(run.assertions().length, 27, 'number of assertions');
+            test.nok(run.passed, 'test result with failures is a fail');
+            test.ok(run.failed, 'use fail property to check for failure');
+            test.is(run.passes(), 14, 'number of passes');
+            test.is(run.fails(), 13, 'number of fails');
 
             var i = -1;
 
             function testAssertion (assertion, message, passes) {
-                test.is(res.events[++i].message, message, 'message for ' + assertion + ' assertion');
+                test.is(run.events[++i].message, message, 'message for ' + assertion + ' assertion');
                 if (passes) {
-                    test.ok(res.events[i].passed, assertion + ' passes');
-                    test.nok(res.events[i].failed, assertion + ' does not fail');
+                    test.ok(run.events[i].passed, assertion + ' passes');
+                    test.nok(run.events[i].failed, assertion + ' does not fail');
                     test.ok(returns[i], assertion + ' return value true');
                 }
                 else {
-                    test.nok(res.events[i].passed, assertion + ' does not pass');
-                    test.ok(res.events[i].failed, assertion + ' fails');
+                    test.nok(run.events[i].passed, assertion + ' does not pass');
+                    test.ok(run.events[i].failed, assertion + ' fails');
                     test.nok(returns[i], assertion + ' return value false');
                 }
             }
@@ -118,6 +119,7 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
             testAssertion('unlike(\'b\', /a/)', 'b unlike /a/', true);
 
         });
+        run.start();
     });
 });
 

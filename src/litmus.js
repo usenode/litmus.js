@@ -239,14 +239,18 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     Suite = ns.Suite = function (name, tests) {
         this.name = name;
         for (var i = 0, l = tests.length; i < l; i++) {
-            if (! tests[i])
-                throw 'litmus: test ' +
+            if (! tests[i]) {
+                throw new Error('litmus: test ' +
                     i +
-                    ' passed to new litmus.Suite() undefined';
-            else if (! (tests[i] instanceof Suite || tests[i] instanceof Test))
-                throw 'litmus: test ' +
+                    ' passed to new litmus.Suite() undefined'
+                );
+            }
+            else if (! (tests[i] instanceof Suite || tests[i] instanceof Test)) {
+                throw new Error('litmus: test ' +
                     i +
-                    ' passed to new litmus.Suite() not litmus.Test or litmus.Suite';
+                    ' passed to new litmus.Suite() not litmus.Test or litmus.Suite'
+                );
+            }
         }
         // TODO - why slice? Add explanation
         this.tests = tests.slice();
@@ -677,26 +681,38 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.start = function () {
+        var run = this;
         this._fireEvent('start');
         try {
             this.test.runFunc.call(this);
         }
         catch (e) {
-            // TODO clean this up
             var location = (e.fileName ? ' at ' + e.fileName + ' line ' + e.lineNumber : '');
-            var message = 'error in "' + this.test.name + '" test - ' + (e.message || e) + location + (e.stack ? '\n' + e.stack : '');
-            this.addException({ 'message' : message, 'location' : location });
+            new Error('error in "' + this.test.name + '" test - ' + (e.message || e) + location + (e.stack ? '\n' + e.stack : ''));
+            this.addException(new Error('error in "' + this.test.name + '" test - ' + (e.message || e) + location + (e.stack ? '\n' + e.stack : '')));
         }
-        var run = this;
         promise.when(
             promise.all(this.asyncHandles.map(function (handle) {
                 return handle.finished;
             })),
             function () {
-                run.failed = ! (run.passed = (run.exceptions.length === 0) && run.plannedAssertionsRan());
+                if (run.plannedAssertionsRan()) {
+                    // TODO how many ran out of how many planned
+                    run.addException('planned number of assertions did not run');
+                }
+                if (! run.failed) {
+                    run.failed = false;
+                    run.passed = true;
+                }
                 run.finished.resolve();
             }
         );
+    };
+
+    TestRun.prototype._failRun = function (reason) {
+        this.passed = false;
+        this.failed = true;
+        this._fireEvent('fail', reason);
     };
 
    /**
@@ -708,6 +724,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
 
     TestRun.prototype.addException = function (exception) {
         this.exceptions.push(exception);
+        this._failRun(exception);
     };
 
    /**
@@ -893,8 +910,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     TestRun.prototype.addAssertion = function (assertion) {
         this.events.push(assertion);
         if (! assertion.passed) {
-            this.passed = false;
-            this.failed = true;
+            this._failRun(assertion);
         }
         return assertion.passed;
     };
@@ -1140,7 +1156,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
         this.finished = new promise.Promise();
         var handle = this;
         this._timeout = setTimeout(function () {
-            handle.finished.emitError(new Error('async operation "' + desc + '" timed out after ' + timeout + ' seconds'));
+            handle.finished.reject(new Error('async operation "' + desc + '" timed out after ' + timeout + ' seconds'));
         }, timeout * 1000);
     };
 
