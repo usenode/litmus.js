@@ -1,6 +1,5 @@
 
-
-pkg.define('litmus_tests_events', ['litmus', 'node:sys'], function (litmus, sys) {
+pkg.define('litmus_tests_events', ['litmus'], function (litmus) {
     return new litmus.Test('events tests', function () {
         this.plan(1);
 
@@ -15,6 +14,7 @@ pkg.define('litmus_tests_events', ['litmus', 'node:sys'], function (litmus, sys)
         var run = testTest.createRun();
 
         run.on('plan', function (e) {
+            console.log('got plan');
             test.is(e.assertions, planned, 'number of planned test as expected');
         });
 

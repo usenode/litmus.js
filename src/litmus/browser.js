@@ -17,11 +17,11 @@ pkg.define('litmus_browser', ['litmus'], function (litmus) {
     * Format a TestResult/SuiteResult and add it to the document body.
     */
 
-    function addToBody (res) {
+    function addToBody (run) {
         var formatter = new litmus.StaticHtmlFormatter();
         var element = document.createElement('div');
         element.setAttribute('class', 'litmus-results');
-        element.innerHTML = formatter.format(res);
+        element.innerHTML = formatter.format(run);
         body.appendChild(element);
     }
 
@@ -38,15 +38,17 @@ pkg.define('litmus_browser', ['litmus'], function (litmus) {
 
     function getTests (defaultTest) {
         if (location.search) {
-              var tests = location.search.substr(1).split('&');
+            var tests = location.search.substr(1).split('&');
             for (var i = 0, l = tests.length; i < l; i++) {
-                if (! /^\w+(?:\.\w+)*$/.test(tests[i]))
+                if (! /^\w+(?:\.\w+)*$/.test(tests[i])) {
                     throw 'invalid package name passed on query string: ' + tests[i];
+                }
             }
             return tests;
         }
-        else
-            return [defaultTest]
+        else {
+            return [defaultTest];
+        }
     }
 
    /**
@@ -63,22 +65,17 @@ pkg.define('litmus_browser', ['litmus'], function (litmus) {
 
     ns.runStatic = function (defaultTest) {
 
-        var tests = getTests(defaultTest),
-            i = 0;
+        var tests = getTests(defaultTest);
 
-        function loadRunAndContinue () {
-            var test = tests[i++];
-            if (! test) return;
-
-            pkg.load(test, function (testNs) {
-                testNs.run(function () {
-                    addToBody(this);
-                    loadRunAndContinue();
+        for (var i = 0, l = tests.length; i < l; i++) {
+            pkg.load(tests[i], function (test) {
+                var run = test.createRun();
+                run.finished.then(function () {
+                    addToBody(run);
                 });
+                run.start();
             });
         }
-
-        loadRunAndContinue();
     };
 
     return ns;
