@@ -14,7 +14,6 @@ pkg.define('litmus_tests_events', ['litmus'], function (litmus) {
         var run = testTest.createRun();
 
         run.on('plan', function (e) {
-            console.log('got plan');
             test.is(e.assertions, planned, 'number of planned test as expected');
         });
 

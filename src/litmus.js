@@ -69,10 +69,7 @@ pkg.define('litmus', ['promise'], function (promise) {
                 return;
             }
             this._eventHandlers[eventName].map(function (handler) {
-                // TODO something more efficient in node?
-                setTimeout(function () {
-                    handler(event);
-                }, 0);
+                handler(event);
             });
         };
     }
