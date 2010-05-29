@@ -149,11 +149,11 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     function dump (o, level) {
         if (! level) level = 0;
         if (level > 4) return '...';
-        if (typeof(o) == 'undefined') return 'undefined';
-        if (typeof(o) == 'number') return o;
-        if (typeof(o) == 'function') return 'function () { ... }';
-        if (typeof(o) == 'boolean') return o ? 'true' : 'false';
-        if (typeof(o) == 'object') {
+        if (typeof(o) === 'undefined') return 'undefined';
+        if (typeof(o) === 'number') return o;
+        if (typeof(o) === 'function') return 'function () { ... }';
+        if (typeof(o) === 'boolean') return o ? 'true' : 'false';
+        if (typeof(o) === 'object') {
             var r = ['{'];
             var first = true;
             for (var i in o) {
@@ -179,7 +179,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     function stripWhitespace (str) {
-        if (typeof(str) == 'undefined') return 'undefined';
+        if (typeof(str) === 'undefined') return 'undefined';
         return String(str).replace(/\s+/g, ' ');
     }
 
@@ -408,6 +408,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
     
     Is = function (val, isVal, message) {
+        // keep this == instead of === as we want it to be permissive with types
         var passed = val == isVal;
         var extra;
         if (! passed) { // TODO - quote and truncate
@@ -461,10 +462,10 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
         var passed = clss && isa(instance, clss);
         var extra = '';
         if (! passed) {
-            if (typeof(instance) == 'undefined') {
+            if (typeof(instance) === 'undefined') {
                 extra = '\n    instance is undefined';
             }
-            else if (typeof(clss) == 'undefined') {
+            else if (typeof(clss) === 'undefined') {
                 extra = '\n    class is undefined';
             }
             else if (! passed) {
@@ -696,9 +697,9 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 return handle.finished;
             })),
             function () {
-                if (run.plannedAssertionsRan()) {
-                    // TODO how many ran out of how many planned
-                    run.addException('planned number of assertions did not run');
+                if (run.passed && ! run.plannedAssertionsRan()) {
+                    run.failed = false;
+                    run.passed = true;                    
                 }
                 if (! run.failed) {
                     run.failed = false;
@@ -710,6 +711,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     };
 
     TestRun.prototype._failRun = function (reason) {
+        sys.debug('failing run: ' + reason);
         this.passed = false;
         this.failed = true;
         this._fireEvent('fail', reason);
@@ -723,6 +725,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.addException = function (exception) {
+//        throw new Error('asdf');
         this.exceptions.push(exception);
         this._failRun(exception);
     };
@@ -861,8 +864,9 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.plannedAssertionsRan = function () {
-        return typeof(this.planned) == 'undefined' ||
-               this.planned == (this.assertionsSkipped() + this.assertions().length);
+        sys.debug(this.planned + ' === (' + this.assertionsSkipped() + ' + ' + this.assertions().length + ')');
+        return typeof(this.planned) === 'undefined' ||
+               this.planned === (this.assertionsSkipped() + this.assertions().length);
     };
 
    /**
@@ -1249,9 +1253,9 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     function escapeHtml (html) {
         return html.toString().replace(/([&<>""])/g, function (character) {
             return '&' + (
-                character == '&' ? 'amp' :
-                character == '<' ? 'lt' :
-                character == '>' ? 'gt' : 'quot'
+                character === '&' ? 'amp' :
+                character === '<' ? 'lt' :
+                character === '>' ? 'gt' : 'quot'
             ) + ';';
         });
     }

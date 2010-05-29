@@ -24,21 +24,25 @@ pkg.define('litmus_tests_skipif', ['litmus'], function (litmus) {
             });
         });
 
-        testedTest.run(function () {
+        var run = testedTest.createRun();
 
-            test.ok(this.plannedAssertionsRan(), 'ran the planned number of assertions');
+        run.finished.then(function () {
 
-            test.ok(this.passed, 'test with skipped fails passes');
+            test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
 
-            test.is(this.events.length, 3, 'test has three events');
+            test.ok(run.passed, 'test with skipped fails passes');
 
-            test.is(this.events[0].skipped, 3, 'first event is three skipped assertions');
-            test.ok(this.events[1].isAssertion, 'second event is an Assertion');
-            test.ok(this.events[2].isAssertion, 'third event is an Assertion');
+            test.is(run.events.length, 3, 'test has three events');
 
-            test.is(this.events[0].reason, 'test skip', 'SkippedAssertion has reason');
+            test.is(run.events[0].skipped, 3, 'first event is three skipped assertions');
+            test.ok(run.events[1].isAssertion, 'second event is an Assertion');
+            test.ok(run.events[2].isAssertion, 'third event is an Assertion');
+
+            test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
 
         });
+
+        run.start();
     });
 });
 
