@@ -718,7 +718,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.plan = function (assertions) {
-        this._emitEvent('plan', { 'assertions' : assertions });
+        this._fireEvent('plan', { 'assertions' : assertions });
         this.planned = assertions;
     };
 
@@ -1362,80 +1362,83 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
    /**
     * @method Get the passed in TestRun or SuiteRun formatted as plain text.
     *
-    * @param {TestRun|SuiteRun} res
-    *   The result to be formatted.
+    * @param {TestRun|SuiteRun} run
+    *   The suite or test run to be formatted.
     *
     * @returns String - the formatted plain text.
     */
 
-    StaticTextFormatter.prototype.format = function (res) {
-        var r = [];
-        r.push(
+    StaticTextFormatter.prototype.format = function (run) {
+        var buffer = [];
+        buffer.push(
             'Litmus Test Result\n',
             '====================\n\n',
             'Result: ',
-            res.passed ? 'PASS' : 'FAIL',
+            run.passed ? 'PASS' : 'FAIL',
             '\n\n'
         );
 
-        this.formatSuiteOrTest(r, res);
+        this.formatSuiteOrTest(buffer, run);
 
-        r.push(
+        buffer.push(
             'Summary\n',
             '=======\n\n',
-            res.passed ? 'PASS' : 'FAIL',
+            run.passed ? 'PASS' : 'FAIL',
             '\n'
         );
 
-        return r.join('');
+        return buffer.join('');
     };
 
    /**
     * @private
     * @method Get passed in TestRun formatted as plain text.
     *
-    * @param {Array} r
+    * @param {Array} buffer
     *   Buffer for collecting output.
-    * @param {TestRun} res
+    * @param {TestRun} run
     *   The TestRun to format.
     */
 
-    StaticTextFormatter.prototype.formatTest = function (r, res) {
-        r.push(
-            res.test.name, '\n',
-            times('-', res.test.name.length), '\n\n'
+    StaticTextFormatter.prototype.formatTest = function (buffer, run) {
+        buffer.push(
+            run.test.name, '\n',
+            times('-', run.test.name.length), '\n\n'
         );
-        if (res.error) {
-            r.push('An exception was encountered while running the test. See below.\n\n');
+        if (run.exceptions.length === 1) {
+            buffer.push('An exception was encountered while running the test. See below.\n\n');
         }
-        if (res.plannedAssertionsRan()) {
-            r.push('Assertions: ', res.assertions().length, '\n');
+        else if (run.exceptions.length > 1) {
+            buffer.push('Exceptions were encountered while running the test. See below.\n\n');
+        }
+        if (run.plannedAssertionsRan()) {
+            buffer.push('Assertions: ', run.assertions().length, '\n');
         }
         else {
-            r.push(
+            buffer.push(
                 '!!! Assertions count error. Planned ',
-                res.planned,
+                run.planned,
                 ' assertions, but ran ',
-                res.assertions().length,
+                run.assertions().length,
                 ' !!!\n\n'
             );
         }
-        r.push(
+        buffer.push(
             'Passes: ',
-            res.passes(),
+            run.passes(),
             ', Fails: ',
-            res.fails(),
+            run.fails(),
             '\n\n'
         );
-        for (var i = 0, l = res.events.length; i < l; i++) {
-            var event = res.events[i];
+        for (var i = 0, l = run.events.length; i < l; i++) {
+            var event = run.events[i];
             if (event instanceof Diagnostic) {
-                r.push(
+                buffer.push(
                     '# ', event.text, '\n'
                 );
             }
             else if (event instanceof SkippedAssertions) {
-                r.push(
+                buffer.push(
                     '[ SKIPPED ] ',
                     event.skipped,
                     ' assertions skipped - ',
@@ -1444,7 +1447,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 );
             }
             else {
-                r.push(
+                buffer.push(
                     '[ ',
                         event.passed ? 'PASS' : 'FAIL',
                     ' ] ',
@@ -1454,10 +1457,10 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 );
             }
         }
-        if (res.error) {
-            r.push('\n[ ERROR ] ', res.error, '\n');
+        for (var i = 0, l = run.exceptions.length; i < l; i++) {
+            buffer.push('\n[ ERROR ] ', run.exceptions[i].message, '\n');
         }
-        r.push('\n');
+        buffer.push('\n');
     };
 
     return ns;
