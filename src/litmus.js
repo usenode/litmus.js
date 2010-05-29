@@ -55,8 +55,8 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 this._eventHandlers[eventName] = [];
             }
             this._eventHandlers[eventName].push(
-                callback ?
-                    function () { return callback.call(invocant); } :
+                invocant ?
+                    function (e) { return callback.call(invocant, e); } :
                     callback
             );
         };
@@ -68,10 +68,12 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
             if (! (this._eventHandlers && this._eventHandlers[eventName])) {
                 return;
             }
-            for (var i = 0, l = this._eventHandlers[eventName].length; i < l; i++) {
-                // TODO replace with something more efficient in node?
-                setTimeout(this._eventHandlers[eventName], 0);
-            }
+            this._eventHandlers[eventName].map(function (handler) {
+                // TODO something more efficient in node?
+                setTimeout(function () {
+                    handler(event);
+                }, 0);
+            });
         };
     }
 
@@ -199,9 +201,9 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
         var run = this;
         this.finished.then(function (runs) {
             run.failed = ! (run.passed = run.runs.every(function (run) {
-                run.passed;
-                run._fireEvent('finish');
+                return run.passed;
             }));
+            run._fireEvent('finish');
         });
     };
 
@@ -697,9 +699,8 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 return handle.finished;
             })),
             function () {
-                if (run.passed && ! run.plannedAssertionsRan()) {
-                    run.failed = false;
-                    run.passed = true;                    
+                if (! run.plannedAssertionsRan()) {
+                    run.addException(new Error('wrong number of tests ran'));
                 }
                 if (! run.failed) {
                     run.failed = false;
@@ -711,7 +712,6 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     };
 
     TestRun.prototype._failRun = function (reason) {
-        sys.debug('failing run: ' + reason);
         this.passed = false;
         this.failed = true;
         this._fireEvent('fail', reason);
@@ -725,7 +725,6 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.addException = function (exception) {
-//        throw new Error('asdf');
         this.exceptions.push(exception);
         this._failRun(exception);
     };
@@ -796,13 +795,6 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
         var handle = new AsyncHandle(desc, asyncTimeout || 10),
             run = this;
         this.asyncHandles.push(handle);
-        promise.when(handle.finished, function () {
-            this.asyncHandles = this.asyncHandles.filter(function (i) {
-                return i !== handle;
-            });
-        }, function (err) {
-            run.addException(err);
-        });
         if (func) {
             func.call(this, handle);
         }
@@ -864,7 +856,6 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.plannedAssertionsRan = function () {
-        sys.debug(this.planned + ' === (' + this.assertionsSkipped() + ' + ' + this.assertions().length + ')');
         return typeof(this.planned) === 'undefined' ||
                this.planned === (this.assertionsSkipped() + this.assertions().length);
     };
@@ -1160,8 +1151,14 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
         this.finished = new promise.Promise();
         var handle = this;
         this._timeout = setTimeout(function () {
+            delete handle._timeout;
             handle.finished.reject(new Error('async operation "' + desc + '" timed out after ' + timeout + ' seconds'));
         }, timeout * 1000);
+        this.finished.then(function () {
+            if (handle._timeout) {
+                clearTimeout(handle._timeout);
+            }
+        });
     };
 
     makeEventEmitter(AsyncHandle);

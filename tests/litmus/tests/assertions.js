@@ -9,9 +9,8 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
         var test = this;
 
         var testedTest = new litmus.Test(
-
             'test test', function () {
-                
+
                 this.plan(27);
 
                 returns[r++] = this.pass('simplest pass');
@@ -56,7 +55,9 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
         );
 
         var run = testedTest.createRun();
-
+        
+        var handle = this.async('wait for test test to finish');
+    
         run.finished.then(function () {
 
             test.is(run.assertions().length, 27, 'number of assertions');
@@ -118,6 +119,7 @@ pkg.define('litmus_tests_assertions', ['litmus'], function (litmus) {
             testAssertion('unlike(\'a\', /a/)', 'a not unlike /a/', false);
             testAssertion('unlike(\'b\', /a/)', 'b unlike /a/', true);
 
+            handle.finish();
         });
         run.start();
     });

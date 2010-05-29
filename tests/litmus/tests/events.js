@@ -1,6 +1,6 @@
 
 
-pkg.define('litmus_tests_events', ['litmus'], function (litmus) {
+pkg.define('litmus_tests_events', ['litmus', 'node:sys'], function (litmus, sys) {
     return new litmus.Test('events tests', function () {
         this.plan(1);
 
@@ -12,16 +12,19 @@ pkg.define('litmus_tests_events', ['litmus'], function (litmus) {
             this.plan(planned);
         });
 
-        testTest.on('plan', function (e) {
-            test.equals(e.number, planned, 'number of planned test as expected');
+        var run = testTest.createRun();
+
+        run.on('plan', function (e) {
+            test.is(e.assertions, planned, 'number of planned test as expected');
         });
 
-        test.async('events handled by onfinish', function (handle) {
-            testTest.run(function () {
-                handle.finish();
-            });
+        var handle = this.async('events handled by onfinish');
+
+        run.finished.then(function () {
+            handle.finish();
         });
 
+        run.start();
     });
 });
 

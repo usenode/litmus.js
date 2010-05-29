@@ -26,6 +26,8 @@ pkg.define('litmus_tests_skipif', ['litmus'], function (litmus) {
 
         var run = testedTest.createRun();
 
+        var handle = this.async('wait for test test to finish');
+
         run.finished.then(function () {
 
             test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
@@ -39,7 +41,8 @@ pkg.define('litmus_tests_skipif', ['litmus'], function (litmus) {
             test.ok(run.events[2].isAssertion, 'third event is an Assertion');
 
             test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
-
+            
+            handle.finish();
         });
 
         run.start();

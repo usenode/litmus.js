@@ -1,7 +1,7 @@
 
 pkg.define('litmus_tests_async', ['litmus'], function (litmus) {
     return new litmus.Test('asynchronous tests', function () {
-        this.plan(9);
+        this.plan(6);
 
         var test = this;
 
@@ -15,28 +15,13 @@ pkg.define('litmus_tests_async', ['litmus'], function (litmus) {
         }
 
 
-        this.skipif(! hasSetTimeout, 'no setTimeout', 5, function () {
+        this.skipif(! hasSetTimeout, 'no setTimeout', 2, function () {
 
             this.async('onfinish for timeout tests', function (handle) {
 
                 this.is(test, this, 'invocant to async is test');
-                this.is(handle.test, this, 'can also get at test from handle');
-
-                var onfinishes = '';
-
-                handle.onfinish(function () {
-                    this.is(onfinishes, 'ab', 'all inner onfinishes ran in order added');
-                });
 
                 var innerHandle = this.async('testing async timeout');
-
-                innerHandle.onfinish(function () {
-                    onfinishes += 'a';
-                });
-
-                innerHandle.onfinish(function () {
-                    onfinishes += 'b';
-                });
 
                 setTimeout(function () {
                     test.pass('async assertion');
@@ -50,10 +35,6 @@ pkg.define('litmus_tests_async', ['litmus'], function (litmus) {
         });
 
         var handle = this.async('testing async calls with no async timeout');
-
-        handle.onfinish(function () {
-            this.pass('assertion inside onfinish for non-async');
-        });
 
         this.pass('non-async assertion');
 
