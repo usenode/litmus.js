@@ -210,19 +210,19 @@ pkg.define('litmus', ['promise'], function (promise) {
     * @method Starts the suite running.
     */
     SuiteRun.prototype.start = function () {
-        var iterator = this.suite.testIterator(),
-            test,
-            run;
-        while (test = iterator()) {
-            run = test.createRun();
-            this.runs.push(run);
-            run.start();
-        }
-        var suiteRun = this;
+        var finished = [],
+            run = this;
+        // TODO check this
         promise.all(
-            this.runs.map(function (run) { return run.finished; })
+            this.tests.map(function (name) {
+                return pkg.load(this.tests[i]).then(function (test) {
+                    var run = test.createRun();
+                    run.start();
+                    return run.finished;
+                });
+            });
         ).then(function () {
-            suiteRun.finished.resolve();
+            run.finished.resolve();
         });
     };
 
@@ -237,7 +237,8 @@ pkg.define('litmus', ['promise'], function (promise) {
 
     Suite = ns.Suite = function (name, tests) {
         this.name = name;
-        for (var i = 0, l = tests.length; i < l; i++) {
+        this.tests = tests;
+/*        for (var i = 0, l = tests.length; i < l; i++) {
             if (! tests[i]) {
                 throw new Error('litmus: test ' +
                     i +
@@ -253,6 +254,7 @@ pkg.define('litmus', ['promise'], function (promise) {
         }
         // TODO - why slice? Add explanation
         this.tests = tests.slice();
+*/
     };
 
    /**
