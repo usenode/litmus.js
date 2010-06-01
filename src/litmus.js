@@ -7,7 +7,7 @@
  * @version 0.2
  */
 
-pkg.define('litmus', ['promise'], function (promise) {
+pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
 
    /**
     * @namespace Classes for writing, running and formatting the results of tests and
@@ -193,11 +193,11 @@ pkg.define('litmus', ['promise'], function (promise) {
 
     SuiteRun = function (suite) {
         this.suite = suite;
-        this.runs = [];
         this.finished = new promise.Promise();
         var run = this;
         this.finished.then(function (runs) {
-            run.failed = ! (run.passed = run.runs.every(function (run) {
+            run.runs = runs;
+            run.failed = ! (run.passed = runs.every(function (run) {
                 return run.passed;
             }));
             run._fireEvent('finish');
@@ -214,15 +214,15 @@ pkg.define('litmus', ['promise'], function (promise) {
             run = this;
         // TODO check this
         promise.all(
-            this.tests.map(function (name) {
-                return pkg.load(this.tests[i]).then(function (test) {
+            this.suite.tests.map(function (name) {
+                return pkg.load(name).then(function (test) {
                     var run = test.createRun();
                     run.start();
-                    return run.finished;
+                    return run;
                 });
-            });
-        ).then(function () {
-            run.finished.resolve();
+            })
+        ).then(function (runs) {
+            run.finished.resolve(runs);
         });
     };
 
