@@ -25,11 +25,11 @@ pkg.define('litmus_commandline', ['litmus', 'node:sys'], function (litmus, sys) 
         '--include' : function (option, remainingOptions) {
             var include = remainingOptions.shift();
             if (! include) {
-                throw 'litmus: ' + option + ' must have an include path passed';
+                throw new Error('litmus: ' + option + ' must have an include path passed');
             }
             var match = include.match(/^(\w+(?:_\w+)*):((?:\.{1,2}|\w+)(?:\/(?:\w+|\.|\.{1,2}))*)$/);
             if (! match) {
-                throw 'litmus: ' + option + ' must be of the form package_prefix:path/prefix';
+                throw new Error('litmus: ' + option + ' must be of the form package_prefix:path/prefix');
             }
             this.lib[match[1]] = match[2];
         }

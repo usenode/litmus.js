@@ -2,7 +2,7 @@
 
 var litmusRoot = __filename.replace(/[\\\/]bin[\\\/]litmus$/, '');
 
-var pkg = require(litmusRoot + '/ext/pkg.js/src/pkg').pkg;
+var pkg = require(litmusRoot + '/../pkg.js/src/pkg').pkg;
 
 pkg.lib(litmusRoot + '/src', 'litmus');
 
