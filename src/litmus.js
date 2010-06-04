@@ -222,7 +222,12 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 });
             })
         ).then(function (runs) {
-            run.finished.resolve(runs);
+            promise.when(
+                promise.all(runs.map(function (run) { return run.finished; })),
+                function () {
+                    run.finished.resolve(runs);
+                }
+            );
         });
     };
 
@@ -668,12 +673,17 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     *   A callback that will be invoked when the test is finished and the result ready.
     */
 
+    var notStartedState = 1,
+        runningState    = 2,
+        finishedState   = 3;
+
     TestRun = function (test) {
         this.test = test;
         this.events = [];
         this.asyncHandles = [];
         this.exceptions = [];
         this.finished = new promise.Promise();
+        this.state = notStartedState;
     };
 
     makeEventEmitter(TestRun);
@@ -683,6 +693,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.start = function () {
+        this.state = runningState;
         var run = this;
         this._fireEvent('start');
         try {
@@ -698,6 +709,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
                 return handle.finished;
             })),
             function () {
+                run.state = finishedState;
                 if (! run.plannedAssertionsRan()) {
                     run.addException(new Error('wrong number of tests ran'));
                 }
@@ -717,6 +729,21 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     };
 
    /**
+    * @method Check the test is running and throw an appropriate exception otherwise.
+    *
+    * @param {string} what
+    *   The thing being set/added to the test run.
+    */
+    TestRun.prototype._checkRunning = function (what) {
+        if (this.state === notStartedState) {
+            throw new Error(what + ' added to test run before it was started');
+        }
+        else if (this.state === finishedState) {
+            throw new Error(what + ' added to test run after it was finished');
+        }
+    };
+
+   /**
     * @method Set an exception caught running the test.
     *
     * @param {object} exception
@@ -724,6 +751,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.addException = function (exception) {
+        this._checkRunning('exception');
         this.exceptions.push(exception);
         this._failRun(exception);
     };
@@ -736,6 +764,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.plan = function (assertions) {
+        this._checkRunning('plan');
         this._fireEvent('plan', { 'assertions' : assertions });
         this.planned = assertions;
     };
@@ -748,6 +777,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.diag = function (text) {
+        this._checkRunning('diagnostic');
         this.events.push(new Diagnostic(text));
     };
 
@@ -768,6 +798,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.skipif = function (cond, reason, skipped, tests) {
+        this._checkRunning('skipped assertions');
         if (cond) {
             this.events.push(new SkippedAssertions(reason, skipped));
         }
@@ -791,6 +822,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
     
     TestRun.prototype.async = function (desc, func, asyncTimeout) {
+        this._checkRunning('asynchronous section');
         var handle = new AsyncHandle(desc, asyncTimeout || 10),
             run = this;
         this.asyncHandles.push(handle);
@@ -902,6 +934,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
     */
 
     TestRun.prototype.addAssertion = function (assertion) {
+        this._checkRunning('assertion');
         this.events.push(assertion);
         if (! assertion.passed) {
             this._failRun(assertion);
