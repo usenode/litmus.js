@@ -709,7 +709,6 @@ pkg.define('litmus', ['promise'], function (promise) {
                 return handle.finished;
             })),
             function () {
-                run.state = finishedState;
                 if (! run.plannedAssertionsRan()) {
                     run.addException(new Error('wrong number of tests ran'));
                 }
@@ -717,6 +716,7 @@ pkg.define('litmus', ['promise'], function (promise) {
                     run.failed = false;
                     run.passed = true;
                 }
+                run.state = finishedState;
                 run.finished.resolve();
             }
         );
@@ -751,7 +751,7 @@ pkg.define('litmus', ['promise'], function (promise) {
     */
 
     TestRun.prototype.addException = function (exception) {
-        this._checkRunning('exception');
+        this._checkRunning('exception (' + (exception.message || exception) + ')');
         this.exceptions.push(exception);
         this._failRun(exception);
     };
