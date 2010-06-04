@@ -834,7 +834,7 @@ pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
             throw new Error('func prarameter to async method must be a function (' + typeof(desc) + ' found)');
         }
         this._checkRunning('asynchronous section');
-        var handle = new AsyncHandle(desc, asyncTimeout || 10),
+        var handle = new AsyncHandle(desc, asyncTimeout || 4),
             run = this;
         this.asyncHandles.push(handle);
         if (func) {
