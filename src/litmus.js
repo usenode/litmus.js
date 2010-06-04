@@ -7,7 +7,7 @@
  * @version 0.2
  */
 
-pkg.define('litmus', ['promise'], function (promise) {
+pkg.define('litmus', ['promise', 'node:sys'], function (promise, sys) {
 
    /**
     * @namespace Classes for writing, running and formatting the results of tests and
@@ -708,7 +708,12 @@ pkg.define('litmus', ['promise'], function (promise) {
             promise.all(this.asyncHandles.map(function (handle) {
                 return handle.finished;
             })),
-            function () {
+            function (results) {
+                for (var i = 0, l = results.length; i < l; i++) {
+                    if (typeof(results[i]) !== 'undefined') {
+                        run.addException(results[i]);
+                    }
+                }
                 if (! run.plannedAssertionsRan()) {
                     run.addException(new Error('wrong number of tests ran'));
                 }
@@ -822,6 +827,12 @@ pkg.define('litmus', ['promise'], function (promise) {
     */
     
     TestRun.prototype.async = function (desc, func, asyncTimeout) {
+        if (typeof(desc) !== 'string') {
+            throw new Error('desc prarameter to async method must be a string (' + typeof(desc) + ' found)');
+        }
+        if (typeof(func) !== 'function') {
+            throw new Error('func prarameter to async method must be a function (' + typeof(desc) + ' found)');
+        }
         this._checkRunning('asynchronous section');
         var handle = new AsyncHandle(desc, asyncTimeout || 10),
             run = this;
