@@ -1,0 +1,16 @@
+{
+    "name"         : "litmus",
+    "description"  : "JavaScript Unit Test Library",
+    "version"      : "0.1.0",
+    "engines"      : [ "node >=0.2.5" ],
+    "author"       : "Thomas Yandell <tom.deletethis@yandell.me.uk> (http://tomyandell.wordpress.com/)",
+    "main"         : "./lib/litmus",
+    "directories"  : { "lib" : "./lib" },
+    "engines"      : { "node": ">= 0.2.3" },
+    "depends"      : { "promised-io" : ">= 0.0.1" },
+    "repository" : {
+        "type" : "git",
+        "url"  : "http://github.com/tomyan/litmus.js.git"
+    },
+    "homepage" : "http://github.com/tomyan/litmus.js"
+}
