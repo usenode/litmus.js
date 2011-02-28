@@ -1,11 +1,10 @@
 
-pkg.define('litmus_tests_suite', ['litmus'], function (litmus) {
-        return new litmus.Suite('Litmus Test Suite', [
-            'litmus_tests_assertions',
-            'litmus_tests_skipif',
-            'litmus_tests_async',
-            'litmus_tests_events'
-        ]);
-    }
-);
+var litmus = require('litmus');
+
+exports.test = new litmus.Suite('Litmus Test Suite', [
+    require('./assertions').test,
+    require('./skipif').test,
+    require('./async').test,
+    require('./events').test
+]);
 

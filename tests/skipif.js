@@ -1,51 +1,52 @@
 
-pkg.define('litmus_tests_skipif', ['litmus'], function (litmus) {
-    return new litmus.Test('skipif', function () {
-        this.plan(7);
+var litmus = require('litmus');
 
-        var skippedRan, notSkippedRan;
+exports.test = new litmus.Test('skipif', function () {
+    this.plan(7);
 
-        var test = this;
+    var skippedRan, notSkippedRan;
 
-        var testedTest = new litmus.Test('tested test', function () {
-            this.plan(5);
+    var test = this;
 
-            this.skipif(true, 'test skip', 3, function () {
-                skippedRan = true;
-                this.pass('skipped 1');
-                this.fail('skipped 2');
-                this.pass('skipped 3');
-            });
+    var testedTest = new litmus.Test('tested test', function () {
+        this.plan(5);
 
-            this.skipif(false, 'test not skip', 2, function () {
-                notSkippedRan = true;
-                this.pass('not skipped 1');
-                this.pass('not skipped 2');
-            });
+        this.skipif(true, 'test skip', 3, function () {
+            skippedRan = true;
+            this.pass('skipped 1');
+            this.fail('skipped 2');
+            this.pass('skipped 3');
         });
 
-        var run = testedTest.createRun();
-
-        var handle = this.async('wait for test test to finish');
-
-        run.finished.then(function () {
-
-            test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
-
-            test.ok(run.passed, 'test with skipped fails passes');
-
-            test.is(run.events.length, 3, 'test has three events');
-
-            test.is(run.events[0].skipped, 3, 'first event is three skipped assertions');
-            test.ok(run.events[1].isAssertion, 'second event is an Assertion');
-            test.ok(run.events[2].isAssertion, 'third event is an Assertion');
-
-            test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
-            
-            handle.finish();
+        this.skipif(false, 'test not skip', 2, function () {
+            notSkippedRan = true;
+            this.pass('not skipped 1');
+            this.pass('not skipped 2');
         });
-
-        run.start();
     });
+
+    var run = testedTest.createRun();
+
+    var handle = this.async('wait for test test to finish');
+
+    run.finished.then(function () {
+
+        test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
+
+        test.ok(run.passed, 'test with skipped fails passes');
+
+        test.is(run.events.length, 3, 'test has three events');
+
+        test.is(run.events[0].skipped, 3, 'first event is three skipped assertions');
+        test.ok(run.events[1].isAssertion, 'second event is an Assertion');
+        test.ok(run.events[2].isAssertion, 'third event is an Assertion');
+
+        test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
+        
+        handle.finish();
+    });
+
+    run.start();
 });
+
 
