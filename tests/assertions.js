@@ -1,5 +1,6 @@
 
-var litmus = require('litmus');
+var litmus = require('litmus'),
+    sys    = require('sys');
 
 exports.test = new litmus.Test('basic assertions', function () {
 
