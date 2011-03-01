@@ -2,7 +2,6 @@
 var litmus = require('litmus');
 
 exports.test = new litmus.Test('asynchronous tests', function () {
-    return;
     this.plan(6);
 
     var test = this;
