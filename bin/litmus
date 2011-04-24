@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-var litmusRoot = __filename.replace(/[\\\/]bin[\\\/]litmus$/, '');
-
-var cli = require('litmus/commandline');
+var cli = require('litmus/lib/commandline');
 
 cli.runStatic(process.cwd(), process.argv, process.env);
 
