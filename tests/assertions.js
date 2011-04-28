@@ -1,6 +1,5 @@
 
-var litmus = require('litmus'),
-    sys    = require('sys');
+var litmus = require('litmus');
 
 exports.test = new litmus.Test('basic assertions', function () {
 
@@ -64,7 +63,7 @@ exports.test = new litmus.Test('basic assertions', function () {
 
         test.is(run.assertions().length, 27, 'number of assertions');
         test.nok(run.passed, 'test result with failures is a fail');
-        test.ok(run.failed, 'use fail property to check for failure');
+        test.ok(run.failed, 'use failed property to check for failure');
         test.is(run.passes(), 14, 'number of passes');
         test.is(run.fails(), 13, 'number of fails');
 
