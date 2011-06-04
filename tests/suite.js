@@ -1,5 +1,5 @@
 
-var litmus = require('litmus');
+var litmus = require('../lib/litmus');
 
 exports.test = new litmus.Suite('Litmus Test Suite', [
     require('./assertions').test,

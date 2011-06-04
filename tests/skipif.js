@@ -1,5 +1,5 @@
 
-var litmus = require('litmus'),
+var litmus = require('../lib/litmus'),
     sys    = require('sys');
 
 exports.test = new litmus.Test('skipif', function () {

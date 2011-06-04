@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var cli = require('litmus/lib/commandline');
+var cli = require('../lib/commandline');
 
 cli.runStatic(process.cwd(), process.argv, process.env);
 

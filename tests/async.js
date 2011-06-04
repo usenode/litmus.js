@@ -1,5 +1,5 @@
 
-var litmus = require('litmus');
+var litmus = require('../lib/litmus');
 
 exports.test = new litmus.Test('asynchronous tests', function () {
     this.plan(6);
