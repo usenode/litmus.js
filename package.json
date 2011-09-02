@@ -8,7 +8,7 @@
     "bin"          : { "litmus" : "./bin/litmus" },
     "directories"  : { "lib" : "./lib" },
     "engines"      : { "node": ">= 0.2.3" },
-    "depends"      : { "promised-io" : ">= 0.0.1" },
+    "dependencies" : { "promised-io" : ">= 0.2.1" },
     "repository" : {
         "type" : "git",
         "url"  : "http://github.com/tomyan/litmus.js.git"
