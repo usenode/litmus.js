@@ -12,19 +12,20 @@ exports.test = new litmus.Test('events tests', function () {
         this.plan(planned);
     });
 
-    var run = testTest.createRun();
+    this.async('events handled by onfinish', function (handle) {
 
-    run.on('plan', function (e) {
-        test.is(e.assertions, planned, 'number of planned test as expected');
+        var run = testTest.createRun();
+
+        run.on('plan', function (e) {
+            test.is(e.assertions, planned, 'number of planned test as expected');
+        });
+
+        run.finished.then(function () {
+            handle.finish();
+        });
+
+        run.start();
     });
-
-    var handle = this.async('events handled by onfinish');
-
-    run.finished.then(function () {
-        handle.finish();
-    });
-
-    run.start();
 });
 
 

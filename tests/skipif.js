@@ -26,29 +26,33 @@ exports.test = new litmus.Test('skipif', function () {
         });
     });
 
-    var run = testedTest.createRun();
 
-    var handle = this.async('wait for test test to finish');
+    this.async('wait for test test to finish', function (handle) {
 
-    run.finished.then(function () {
+        var run = testedTest.createRun();
 
-        test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
+        run.finished.then(function () {
 
-        sys.debug(' -- ' + sys.inspect(run.passed));
-        test.ok(run.passed, 'test with skipped fails passes');
+            test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
 
-        test.is(run.events.length, 3, 'test has three events');
+            sys.debug(' -- ' + sys.inspect(run.passed));
+            test.ok(run.passed, 'test with skipped fails passes');
 
-        test.is(run.events[0].skipped, 3, 'first event is three skipped assertions');
-        test.ok(run.events[1].isAssertion, 'second event is an Assertion');
-        test.ok(run.events[2].isAssertion, 'third event is an Assertion');
+            test.is(run.events.length, 3, 'test has three events');
 
-        test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
-        
-        handle.finish();
+            test.is(run.events[0].skipped, 3, 'first event is three skipped assertions');
+            test.ok(run.events[1].isAssertion, 'second event is an Assertion');
+            test.ok(run.events[2].isAssertion, 'third event is an Assertion');
+
+            test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
+            
+            handle.finish();
+        });
+
+        run.start();
+
     });
 
-    run.start();
 });
 
 

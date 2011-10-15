@@ -55,73 +55,77 @@ exports.test = new litmus.Test('basic assertions', function () {
         }
     );
 
-    var run = testedTest.createRun();
-    
-    var handle = this.async('wait for test test to finish');
+    this.async('wait for test test to finish', function (handle) {
 
-    run.finished.then(function () {
+        var run = testedTest.createRun();
 
-        test.is(run.assertions().length, 27, 'number of assertions');
-        test.nok(run.passed, 'test result with failures is a fail');
-        test.ok(run.failed, 'use failed property to check for failure');
-        test.is(run.passes(), 14, 'number of passes');
-        test.is(run.fails(), 13, 'number of fails');
+        run.finished.then(function () {
 
-        var i = -1;
+            test.is(run.assertions().length, 27, 'number of assertions');
+            test.nok(run.passed, 'test result with failures is a fail');
+            test.ok(run.failed, 'use failed property to check for failure');
+            test.is(run.passes(), 14, 'number of passes');
+            test.is(run.fails(), 13, 'number of fails');
 
-        function testAssertion (assertion, message, passes) {
-            test.is(run.events[++i].message, message, 'message for ' + assertion + ' assertion');
-            if (passes) {
-                test.ok(run.events[i].passed, assertion + ' passes');
-                test.nok(run.events[i].failed, assertion + ' does not fail');
-                test.ok(returns[i], assertion + ' return value true');
+            var i = -1;
+
+            function testAssertion (assertion, message, passes) {
+                test.is(run.events[++i].message, message, 'message for ' + assertion + ' assertion');
+                if (passes) {
+                    test.ok(run.events[i].passed, assertion + ' passes');
+                    test.nok(run.events[i].failed, assertion + ' does not fail');
+                    test.ok(returns[i], assertion + ' return value true');
+                }
+                else {
+                    test.nok(run.events[i].passed, assertion + ' does not pass');
+                    test.ok(run.events[i].failed, assertion + ' fails');
+                    test.nok(returns[i], assertion + ' return value false');
+                }
             }
-            else {
-                test.nok(run.events[i].passed, assertion + ' does not pass');
-                test.ok(run.events[i].failed, assertion + ' fails');
-                test.nok(returns[i], assertion + ' return value false');
-            }
-        }
 
-        testAssertion('pass()', 'simplest pass', true);
-        testAssertion('fail()', 'simplest fail', false);
+            testAssertion('pass()', 'simplest pass', true);
+            testAssertion('fail()', 'simplest fail', false);
 
-        testAssertion('ok(true)', 'boolean check true', true);
-        testAssertion('ok(false)', 'boolean check false', false);
+            testAssertion('ok(true)', 'boolean check true', true);
+            testAssertion('ok(false)', 'boolean check false', false);
 
-        testAssertion('nok(true)', 'not boolean check true', false);
-        testAssertion('nok(false)', 'not boolean check false', true);
+            testAssertion('nok(true)', 'not boolean check true', false);
+            testAssertion('nok(false)', 'not boolean check false', true);
 
-        testAssertion('is(1, 1)', 'one equals one', true);
-        testAssertion('is(1, 2)', 'one does not equal two', false);
+            testAssertion('is(1, 1)', 'one equals one', true);
+            testAssertion('is(1, 2)', 'one does not equal two', false);
 
-        testAssertion('not(1, 1)', 'not one equals one', false);
-        testAssertion('not(1, 2)', 'not one does not equal two', true);
+            testAssertion('not(1, 1)', 'not one equals one', false);
+            testAssertion('not(1, 2)', 'not one does not equal two', true);
 
-        testAssertion('lt(1, 2)', 'lt(1, 2) true', true);
-        testAssertion('lt(1, 1)', 'lt(1, 1) false', false);
-        testAssertion('lt(2, 1)', 'lt(2, 1) false', false);
+            testAssertion('lt(1, 2)', 'lt(1, 2) true', true);
+            testAssertion('lt(1, 1)', 'lt(1, 1) false', false);
+            testAssertion('lt(2, 1)', 'lt(2, 1) false', false);
 
-        testAssertion('lte(1, 2)', 'lte(1, 2) true', true);
-        testAssertion('lte(1, 1)', 'lte(1, 1) true', true);
-        testAssertion('lte(2, 1)', 'lte(2, 1) false', false);
+            testAssertion('lte(1, 2)', 'lte(1, 2) true', true);
+            testAssertion('lte(1, 1)', 'lte(1, 1) true', true);
+            testAssertion('lte(2, 1)', 'lte(2, 1) false', false);
 
-        testAssertion('gt(1, 2)', 'gt(1, 2) false', false);
-        testAssertion('gt(1, 1)', 'gt(1, 1) false', false);
-        testAssertion('gt(2, 1)', 'gt(2, 1) true', true);
+            testAssertion('gt(1, 2)', 'gt(1, 2) false', false);
+            testAssertion('gt(1, 1)', 'gt(1, 1) false', false);
+            testAssertion('gt(2, 1)', 'gt(2, 1) true', true);
 
-        testAssertion('gte(1, 2)', 'gte(1, 2) false', false);
-        testAssertion('gte(1, 1)', 'gte(1, 1) true', true);
-        testAssertion('gte(2, 1)', 'gte(2, 1) true', true);
+            testAssertion('gte(1, 2)', 'gte(1, 2) false', false);
+            testAssertion('gte(1, 1)', 'gte(1, 1) true', true);
+            testAssertion('gte(2, 1)', 'gte(2, 1) true', true);
 
-        testAssertion('like(\'a\', /a/)', 'a like /a/', true);
-        testAssertion('like(\'b\', /a/)', 'b not like /a/', false);
+            testAssertion('like(\'a\', /a/)', 'a like /a/', true);
+            testAssertion('like(\'b\', /a/)', 'b not like /a/', false);
 
-        testAssertion('unlike(\'a\', /a/)', 'a not unlike /a/', false);
-        testAssertion('unlike(\'b\', /a/)', 'b unlike /a/', true);
+            testAssertion('unlike(\'a\', /a/)', 'a not unlike /a/', false);
+            testAssertion('unlike(\'b\', /a/)', 'b unlike /a/', true);
 
-        handle.finish();
+            handle.finish();
+        });
+
+        run.start();
+
     });
-    run.start();
+
 });
 

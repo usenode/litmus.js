@@ -2,7 +2,7 @@
 var litmus = require('../lib/litmus');
 
 exports.test = new litmus.Test('asynchronous tests', function () {
-    this.plan(6);
+    this.plan(7);
 
     var test = this;
 
@@ -22,24 +22,33 @@ exports.test = new litmus.Test('asynchronous tests', function () {
 
             this.is(test, this, 'invocant to async is test');
 
-            var innerHandle = this.async('testing async timeout');
+            this.async('testing async timeout', function (innerHandle) {
 
-            setTimeout(function () {
-                test.pass('async assertion');
-                innerHandle.finish();
-                handle.finish();
-            }, 0);
+                setTimeout(function () {
+                    test.pass('async assertion');
+                    innerHandle.finish();
+                    handle.finish();
+                }, 0);
+
+            });
+
         });
 
         this.pass('a sync assertion');
 
     });
 
-    var handle = this.async('testing async calls with no async timeout');
+    var returnedHandle = this.async('testing async calls with no async timeout', function (handle) {
 
-    this.pass('non-async assertion');
+        this.pass('non-async assertion');
 
-    handle.finish();
+        // TODO replace with test for null/undefined return value when deprecation is complete
+        this.throwsOk(function () {
+            returnedHandle.finish();
+        }, /deprecated/, 'deprecation notice thrown');
+
+        handle.finish();
+    });
 
     this.async('asynchronous tests with no async timeout from async method', function (handle) {
         this.pass('sync assertion in async');
