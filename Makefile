@@ -1,5 +1,29 @@
 
 TESTS=./tests/suite.js
+AMD_DIR=./amd
+
+default: test
+
+clean:
+	rm -fr $(AMD_DIR)
+
+setup: clean
+	mkdir $(AMD_DIR)
+
+$(AMD_DIR)/litmus.js:
+	./build/convert-to-amd ./lib/litmus.js > $(AMD_DIR)/litmus.js
+
+$(AMD_DIR)/utils.js:
+	./build/convert-to-amd ./lib/utils.js > $(AMD_DIR)/utils.js
+
+$(AMD_DIR)/assertions.js:
+	./build/convert-to-amd ./lib/assertions.js > $(AMD_DIR)/assertions.js
+
+./node_modules/.bin/commonjs-to-amd:
+	npm install amdtools
+
+# TODO $(AMD_DIR)/utils.js is failing to convert
+amd: ./node_modules/.bin/commonjs-to-amd setup $(AMD_DIR)/assertions.js $(AMD_DIR)/litmus.js
 
 test:
 	./bin/litmus $(TESTS)
