@@ -1,6 +1,5 @@
 
-var litmus = require('../lib/litmus'),
-    sys    = require('sys');
+var litmus = require('../lib/litmus');
 
 exports.test = new litmus.Test('skipif', function () {
     this.plan(7);
@@ -35,7 +34,6 @@ exports.test = new litmus.Test('skipif', function () {
 
             test.ok(run.plannedAssertionsRan(), 'ran the planned number of assertions');
 
-            sys.debug(' -- ' + sys.inspect(run.passed));
             test.ok(run.passed, 'test with skipped fails passes');
 
             test.is(run.events.length, 3, 'test has three events');
