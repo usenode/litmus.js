@@ -14,12 +14,7 @@ $(AMD_DIR)/litmus.js:
 	./node_modules/.bin/commonjs-to-amd ./lib/litmus.js > $(AMD_DIR)/litmus.js
 
 $(AMD_DIR)/utils.js:
-	# TODO this fails for some reason
-	#./node_modules/.bin/commonjs-to-amd ./lib/utils.js > $(AMD_DIR)/utils.js
-	echo 'define(["require","exports","module"],function(require,exports,module){' > $(AMD_DIR)/utils.js && \
-	cat ./lib/utils.js >> $(AMD_DIR)/utils.js && \
-	echo '});' >> $(AMD_DIR)/utils.js
-
+	./node_modules/.bin/commonjs-to-amd ./lib/utils.js > $(AMD_DIR)/utils.js
 
 $(AMD_DIR)/assertions.js:
 	./node_modules/.bin/commonjs-to-amd ./lib/assertions.js > $(AMD_DIR)/assertions.js
