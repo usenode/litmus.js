@@ -24,10 +24,13 @@ $(AMD_DIR)/utils.js:
 $(AMD_DIR)/assertions.js:
 	./node_modules/.bin/commonjs-to-amd ./lib/assertions.js > $(AMD_DIR)/assertions.js
 
+$(AMD_DIR)/formatting.js:
+	./node_modules/.bin/commonjs-to-amd ./lib/formatting.js > $(AMD_DIR)/formatting.js
+
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
 
-amd: ./node_modules/.bin/commonjs-to-amd setup $(AMD_DIR)/utils.js $(AMD_DIR)/assertions.js $(AMD_DIR)/litmus.js
+amd: ./node_modules/.bin/commonjs-to-amd setup $(AMD_DIR)/utils.js $(AMD_DIR)/formatting.js $(AMD_DIR)/assertions.js $(AMD_DIR)/litmus.js
 
 test:
 	./bin/litmus $(TESTS)
