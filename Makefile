@@ -8,24 +8,14 @@ clean:
 	rm -fr $(AMD_DIR)
 
 setup: clean
-	mkdir $(AMD_DIR)
-
-$(AMD_DIR)/litmus.js:
-	./node_modules/.bin/commonjs-to-amd ./lib/litmus.js > $(AMD_DIR)/litmus.js
-
-$(AMD_DIR)/utils.js:
-	./node_modules/.bin/commonjs-to-amd ./lib/utils.js > $(AMD_DIR)/utils.js
-
-$(AMD_DIR)/assertions.js:
-	./node_modules/.bin/commonjs-to-amd ./lib/assertions.js > $(AMD_DIR)/assertions.js
-
-$(AMD_DIR)/formatting.js:
-	./node_modules/.bin/commonjs-to-amd ./lib/formatting.js > $(AMD_DIR)/formatting.js
+	mkdir -p $(AMD_DIR)/lib
+	mkdir -p $(AMD_DIR)/tests
 
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
 
-amd: ./node_modules/.bin/commonjs-to-amd setup $(AMD_DIR)/utils.js $(AMD_DIR)/formatting.js $(AMD_DIR)/assertions.js $(AMD_DIR)/litmus.js
+amd: ./node_modules/.bin/commonjs-to-amd setup
+	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh
 
 test:
 	./bin/litmus $(TESTS)
