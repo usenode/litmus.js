@@ -10,7 +10,7 @@
     "dependencies" : { "promised-io" : ">= 0.2.1" },
     "repository" : {
         "type" : "git",
-        "url"  : "http://github.com/tomyan/litmus.js.git"
+        "url"  : "http://github.com/usenode/litmus.js.git"
     },
     "homepage" : "http://use.no.de/litmus"
 }
