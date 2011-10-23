@@ -15,7 +15,9 @@ setup: clean
 	npm install amdtools
 
 amd: ./node_modules/.bin/commonjs-to-amd setup
-	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh
+	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
+	cp tests/index.html $(AMD_DIR)/tests && \
+	cp -r ext $(AMD_DIR)/ext
 
 test:
 	./bin/litmus $(TESTS)
