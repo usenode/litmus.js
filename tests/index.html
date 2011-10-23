@@ -3,17 +3,24 @@
 <head>
     <title>Litmus Tests</title>
     <meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
-    <script type="text/javascript" src="ext/require.js"></script>  
+    <script type="text/javascript" src="../ext/require.js"></script>  
     <script type="text/javascript">
         require({
-            baseUrl: "../amd",
             paths: {
-                'promised-io/promise': '../node_modules/promised-io/promise'
+                'promised-io/promise': '../../node_modules/promised-io/promise'
             }
         });
 
-        require(['browser'], function (browser) {
-            browser.runStatic('suite');
+        require(['../lib/browser', './suite', '../lib/litmus'], function (browser, suite, litmus) {
+
+            var test = new litmus.Test('browser tests', function () {
+                this.plan(2);
+
+                this.ok(true, 'test runs');
+                this.nok(false, 'test fails');
+            });
+
+            browser.run(test);
         })
     </script>
     <link rel="stylesheet" type="text/css" href="../src/style.css" media="screen,print"/>
