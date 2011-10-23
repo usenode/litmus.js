@@ -11,16 +11,8 @@
             }
         });
 
-        require(['../lib/browser', './suite', '../lib/litmus'], function (browser, suite, litmus) {
-
-            var test = new litmus.Test('browser tests', function () {
-                this.plan(2);
-
-                this.ok(true, 'test runs');
-                this.nok(false, 'test fails');
-            });
-
-            browser.run(test);
+        require(['../lib/browser', './suite'], function (browser, suite) {
+            browser.run(suite.test);
         })
     </script>
     <link rel="stylesheet" type="text/css" href="../src/style.css" media="screen,print"/>
