@@ -8,8 +8,7 @@ clean:
 	rm -fr $(AMD_DIR)
 
 setup: clean
-	mkdir -p $(AMD_DIR)/lib
-	mkdir -p $(AMD_DIR)/tests
+	mkdir -p $(AMD_DIR)/{lib,tests}
 
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
