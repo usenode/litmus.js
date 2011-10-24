@@ -12,7 +12,7 @@ exports.test = new litmus.Test('events tests', function () {
         this.plan(planned);
     });
 
-    this.async('events handled by onfinish', function (handle) {
+    this.async('events handled by onfinish', function (done) {
 
         var run = testTest.createRun();
 
@@ -21,7 +21,7 @@ exports.test = new litmus.Test('events tests', function () {
         });
 
         run.finished.then(function () {
-            handle.finish();
+            done.resolve();
         });
 
         run.start();
