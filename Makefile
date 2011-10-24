@@ -1,6 +1,7 @@
 
 TESTS=./tests/suite.js
 AMD_DIR=./amd
+REQUIREJS_VERSION=1.0.0
 
 default: test
 
@@ -8,15 +9,18 @@ clean:
 	rm -fr $(AMD_DIR)
 
 setup: clean
-	mkdir -p $(AMD_DIR)/{lib,tests}
+	mkdir -p $(AMD_DIR)/{lib,tests,ext}
 
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
 
-amd: ./node_modules/.bin/commonjs-to-amd setup
+./node_modules/requirejs/require.js:
+	npm install requirejs@$(REQUIREJS_VERSION)
+
+amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js setup
 	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
 	cp tests/index.html $(AMD_DIR)/tests && \
-	cp -r ext $(AMD_DIR)/ext
+	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js
 
 test:
 	./bin/litmus $(TESTS)
