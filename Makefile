@@ -28,6 +28,8 @@ browser-dist: amd
 	mkdir -p $(DIST_BUILD_DIR) && \
 	./node_modules/.bin/r.js -o requirejs.build.js && \
 	cp $(DIST_BUILD_DIR)/browser.js $(DIST_DIR)/litmus.js && \
+	cp ./node_modules/requirejs/require.js $(DIST_DIR) && \
+	cp ./dist-example.html $(DIST_DIR) && \
 	rm -fr $(DIST_BUILD_DIR)
 
 test:
