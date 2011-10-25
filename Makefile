@@ -1,12 +1,13 @@
-
 TESTS=./tests/suite.js
 AMD_DIR=./amd
+DIST_DIR=./dist
+DIST_BUILD_DIR=./dist/build
 REQUIREJS_VERSION=1.0.0
 
 default: test
 
 clean:
-	rm -fr $(AMD_DIR)
+	rm -fr $(AMD_DIR) $(DIST_DIR)
 
 setup: clean
 	mkdir -p $(AMD_DIR)/{lib,tests,ext}
@@ -23,6 +24,11 @@ amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js set
 	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js && \
 	cp ext/domReady.js $(AMD_DIR)/ext/domReady.js
 
+browser-dist: amd
+	mkdir -p $(DIST_BUILD_DIR) && \
+	./node_modules/.bin/r.js -o requirejs.build.js && \
+	cp $(DIST_BUILD_DIR)/browser.js $(DIST_DIR)/litmus.js && \
+	rm -fr $(DIST_BUILD_DIR)
 
 test:
 	./bin/litmus $(TESTS)
