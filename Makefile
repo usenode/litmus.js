@@ -2,7 +2,6 @@ TESTS=./tests/suite.js
 AMD_DIR=./amd
 DIST_DIR=./dist
 DIST_BUILD_DIR=./dist/build
-REQUIREJS_VERSION=1.0.0
 
 default: test
 
@@ -16,7 +15,7 @@ setup: clean
 	npm install amdtools
 
 ./node_modules/requirejs/require.js:
-	npm install requirejs@$(REQUIREJS_VERSION)
+	npm install requirejs
 
 amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js setup
 	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
