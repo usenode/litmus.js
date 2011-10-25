@@ -20,7 +20,9 @@ setup: clean
 amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js setup
 	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
 	cp tests/index.html $(AMD_DIR)/tests && \
-	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js
+	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js && \
+	cp ext/domReady.js $(AMD_DIR)/ext/domReady.js
+
 
 test:
 	./bin/litmus $(TESTS)
