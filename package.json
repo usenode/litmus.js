@@ -7,9 +7,12 @@
     "bin"          : { "litmus" : "./bin/litmus" },
     "directories"  : { "lib" : "./lib" },
     "engines"      : { "node": ">= 0.4.7" },
-    "dependencies" : { "promised-io" : ">= 0.2.3" },
+    "dependencies" : {
+        "promised-io" : ">= 0.2.3"
+    },
     "devDependencies" : {
-        "amdtools" : ">= 0.1.1"
+        "amdtools" : ">= 0.1.1",
+        "domready" : ">= 0.2.3"
     },
     "repository" : {
         "type" : "git",
