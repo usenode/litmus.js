@@ -55,7 +55,7 @@ exports.test = new litmus.Test('basic assertions', function () {
         }
     );
 
-    this.async('wait for test test to finish', function (handle) {
+    this.async('wait for test test to finish', function (done) {
 
         var run = testedTest.createRun();
 
@@ -120,7 +120,7 @@ exports.test = new litmus.Test('basic assertions', function () {
             testAssertion('unlike(\'a\', /a/)', 'a not unlike /a/', false);
             testAssertion('unlike(\'b\', /a/)', 'b unlike /a/', true);
 
-            handle.finish();
+            done.resolve();
         });
 
         run.start();

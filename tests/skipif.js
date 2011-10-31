@@ -26,7 +26,7 @@ exports.test = new litmus.Test('skipif', function () {
     });
 
 
-    this.async('wait for test test to finish', function (handle) {
+    this.async('wait for test test to finish', function (done) {
 
         var run = testedTest.createRun();
 
@@ -44,7 +44,7 @@ exports.test = new litmus.Test('skipif', function () {
 
             test.is(run.events[0].reason, 'test skip', 'SkippedAssertion has reason');
             
-            handle.finish();
+            done.resolve();
         });
 
         run.start();
