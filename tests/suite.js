@@ -7,4 +7,3 @@ exports.test = new litmus.Suite('Litmus Test Suite', [
     require('./async').test,
     require('./events').test
 ]);
-
