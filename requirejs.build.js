@@ -5,7 +5,7 @@
     dir: "./dist/build",
     paths: {
         'promised-io/promise': '../../node_modules/promised-io/promise',
-        'domready': '../../ext/domready'
+        'domReady': '../../ext/domReady'
     },
     modules: [
         {
