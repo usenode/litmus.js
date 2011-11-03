@@ -8,6 +8,9 @@
     "directories"  : { "lib" : "./lib" },
     "engines"      : { "node": ">= 0.4.7" },
     "dependencies" : { "promised-io" : ">= 0.2.3" },
+    "devDependencies" : {
+        "amdtools" : ">= 0.1.1"
+    },
     "repository" : {
         "type" : "git",
         "url"  : "http://github.com/usenode/litmus.js.git"
