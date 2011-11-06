@@ -1,7 +1,7 @@
 
 var litmus = require('../lib/litmus');
 
-exports.test = new litmus.Test('basic assertions', function () {
+module.exports = new litmus.Test('basic assertions', function () {
 
     this.plan(109);
 
