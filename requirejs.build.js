@@ -1,7 +1,7 @@
 ({
     baseUrl: ".",
     optimize: "none",
-    appDir: "./amd/lib",
+    appDir: "./amd",
     dir: "./dist/build",
     paths: {
         'promised-io/promise': '../../node_modules/promised-io/promise',
@@ -9,7 +9,7 @@
     },
     modules: [
         {
-            name: "browser"
+            name: "lib/browser"
         }
     ]
 })
