@@ -15,5 +15,8 @@
         "type" : "git",
         "url"  : "http://github.com/usenode/litmus.js.git"
     },
-    "homepage" : "http://use.no.de/litmus"
+    "homepage" : "http://use.no.de/litmus",
+    "scripts" : {
+        "test" : "bin/litmus tests/suite.js"
+    }
 }
