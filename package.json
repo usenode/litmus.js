@@ -1,7 +1,7 @@
 {
     "name"         : "litmus",
     "description"  : "JavaScript Unit Test Library",
-    "version"      : "0.3.1",
+    "version"      : "0.5.0",
     "author"       : "Thomas Yandell <tom.deletethis@yandell.me.uk> (http://tom.yandell.me.uk/blog/)",
     "main"         : "lib/litmus",
     "bin"          : { "litmus" : "./bin/litmus" },
@@ -15,5 +15,8 @@
         "type" : "git",
         "url"  : "http://github.com/usenode/litmus.js.git"
     },
-    "homepage" : "http://use.no.de/litmus"
+    "homepage" : "http://use.no.de/litmus",
+    "scripts" : {
+        "test" : "bin/litmus tests/suite.js"
+    }
 }
