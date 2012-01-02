@@ -12,7 +12,7 @@
             }
         });
 
-        require(['../lib/browser', './suite'], function (browser, suite) {
+        require(['../litmus/browser', './suite'], function (browser, suite) {
             browser.run(suite.test);
         })
     </script>

@@ -9,7 +9,7 @@ clean:
 	rm -fr $(AMD_DIR) $(DIST_DIR)
 
 setup: clean
-	mkdir -p $(AMD_DIR)/{lib,tests,ext}
+	mkdir -p $(AMD_DIR)/{lib,tests,litmus,ext}
 
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
@@ -20,7 +20,7 @@ setup: clean
 	patch ./node_modules/requirejs/require.js ./requirejs-normalizefix.patch
 
 amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js setup
-	find {lib,tests} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
+	find {lib,tests,litmus} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
 	./node_modules/.bin/commonjs-to-amd ./litmus.js > $(AMD_DIR)/litmus.js && \
 	cp tests/index.html $(AMD_DIR)/tests && \
 	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js && \
