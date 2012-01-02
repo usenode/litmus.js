@@ -9,7 +9,7 @@
     },
     modules: [
         {
-            name: "lib/browser"
+            name: "litmus/browser"
         }
     ]
 })
