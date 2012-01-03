@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 TESTS=./tests/suite.js
 AMD_DIR=./amd
 DIST_DIR=./dist
