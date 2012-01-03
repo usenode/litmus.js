@@ -11,6 +11,9 @@ clean:
 setup: clean
 	mkdir -p $(AMD_DIR)/{lib,tests,litmus,ext}
 
+dependencies:
+	npm install .
+
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
 
@@ -26,7 +29,7 @@ amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js set
 	cp ./node_modules/requirejs/require.js $(AMD_DIR)/ext/require.js && \
 	cp ext/domReady.js $(AMD_DIR)/ext/domReady.js
 
-browser-dist: amd
+browser-dist: dependencies amd
 	mkdir -p $(DIST_BUILD_DIR) && \
 	./node_modules/.bin/r.js -o requirejs.build.js && \
 	cp $(DIST_BUILD_DIR)/litmus/browser.js $(DIST_DIR)/litmus.js && \
@@ -34,7 +37,7 @@ browser-dist: amd
 	cp ./dist-example.html $(DIST_DIR) && \
 	rm -fr $(DIST_BUILD_DIR)
 
-test:
+test: dependencies
 	./bin/litmus $(TESTS)
 
 publish: test 
