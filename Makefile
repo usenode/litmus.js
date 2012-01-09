@@ -19,10 +19,8 @@ dependencies:
 ./node_modules/.bin/commonjs-to-amd:
 	npm install amdtools
 
-# see requirejs issue #158
 ./node_modules/requirejs/require.js:
 	npm install requirejs
-	patch ./node_modules/requirejs/require.js ./requirejs-normalizefix.patch
 
 amd: ./node_modules/.bin/commonjs-to-amd ./node_modules/requirejs/require.js setup
 	find {lib,tests,litmus} | grep '.js' | awk -F / '{print "./node_modules/.bin/commonjs-to-amd " $$0 " > $(AMD_DIR)/" $$0 }' | sh && \
@@ -53,4 +51,3 @@ publish: test
 	git push origin master && \
 	git push --tags && \
 	npm publish https://github.com/usenode/litmus.js/tarball/v$$new_version
-
