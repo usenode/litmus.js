@@ -13,7 +13,8 @@
     "dependencies" : { "promised-io" : ">= 0.2.3" },
     "devDependencies" : {
         "amdtools"  : ">= 0.1.1",
-        "requirejs" : ">= 1.0.4"
+        "requirejs" : ">= 1.0.4",
+        "usenode-release": ">= 0.0.4"
     },
     "repository" : {
         "type" : "git",
