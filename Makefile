@@ -41,4 +41,4 @@ test: dependencies
 	./bin/litmus $(TESTS)
 
 release: test
-	./bin/usenode-release .
+	./node_modules/.bin/usenode-release .
