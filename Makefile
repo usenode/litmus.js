@@ -40,5 +40,5 @@ browser-dist: dependencies amd
 test: dependencies
 	./bin/litmus $(TESTS)
 
-release: test
+release: test browser-dist
 	./node_modules/.bin/usenode-release .

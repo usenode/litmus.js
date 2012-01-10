@@ -1,0 +1,9 @@
+*.swp
+*~
+*#*
+.project
+.gitignore
+.npmignore
+.travis.yml
+dist/dist-example.html
+dist/require.js
