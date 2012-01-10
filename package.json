@@ -6,7 +6,7 @@
     "contributors" : [
         "Richard Hodgson <contact@rhodgson.co.uk>"
     ],
-    "main"         : "lib/litmus",
+    "main"         : "litmus",
     "bin"          : { "litmus" : "./bin/litmus" },
     "directories"  : { "lib" : "./lib" },
     "engines"      : { "node": ">= 0.4.7" },
