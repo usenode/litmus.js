@@ -1,7 +1,7 @@
 {
     "name"         : "litmus",
     "description"  : "JavaScript Unit Test Library",
-    "version"      : "0.6.1",
+    "version"      : "0.6.2",
     "author"       : "Thomas Yandell <tom.deletethis@yandell.me.uk> (http://tom.yandell.me.uk/blog/)",
     "contributors" : [
         "Richard Hodgson <contact@rhodgson.co.uk>"
