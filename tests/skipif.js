@@ -1,7 +1,7 @@
 
 var litmus = require('../lib/litmus');
 
-exports.test = new litmus.Test('skipif', function () {
+module.exports = new litmus.Test(module, function () {
     this.plan(7);
 
     var skippedRan, notSkippedRan;

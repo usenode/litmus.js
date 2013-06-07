@@ -1,7 +1,7 @@
 
 var litmus = require('../lib/litmus');
 
-exports.test = new litmus.Test('events tests', function () {
+module.exports = new litmus.Test(module, function () {
     this.plan(1);
 
     var test = this;
