@@ -7,8 +7,8 @@
  */
 
 var promise    = require('promised-io/promise'),
-    utils      = require('./utils'),
-    assertions = require('./assertions');
+    utils      = require('./lib/utils'),
+    assertions = require('./lib/assertions');
 
 /**
  * @namespace Classes for writing, running and formatting the results of tests and

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Litmus Tests</title>
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" data-main="litmus" src="require.js"></script>
+    <script type="text/javascript">
+        require(['litmus/browser', 'litmus'], function (browser, litmus) {
+            browser.run(new litmus.Test('example test', function () {
+                this.ok(true, 'an assertion');
+            }));
+        })
+    </script>
+  </head>
+  <body></body>
+</html>

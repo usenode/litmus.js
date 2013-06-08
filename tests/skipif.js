@@ -1,5 +1,5 @@
 
-var litmus = require('../lib/litmus');
+var litmus = require('../litmus');
 
 module.exports = new litmus.Test(module, function () {
     this.plan(7);

@@ -1,15 +1,20 @@
 {
     "name"         : "litmus",
     "description"  : "JavaScript Unit Test Library",
-    "version"      : "0.5.0",
+    "version"      : "0.6.2",
     "author"       : "Thomas Yandell <tom.deletethis@yandell.me.uk> (http://tom.yandell.me.uk/blog/)",
-    "main"         : "lib/litmus",
+    "contributors" : [
+        "Richard Hodgson <contact@rhodgson.co.uk>"
+    ],
+    "main"         : "litmus",
     "bin"          : { "litmus" : "./bin/litmus" },
     "directories"  : { "lib" : "./lib" },
     "engines"      : { "node": ">= 0.4.7" },
     "dependencies" : { "promised-io" : ">= 0.2.3" },
     "devDependencies" : {
-        "amdtools" : ">= 0.1.1"
+        "amdtools"  : ">= 0.1.1",
+        "requirejs" : ">= 1.0.4",
+        "usenode-release": ">= 0.0.5"
     },
     "repository" : {
         "type" : "git",

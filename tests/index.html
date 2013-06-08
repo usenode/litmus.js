@@ -7,11 +7,12 @@
     <script type="text/javascript">
         require({
             paths: {
-                'promised-io/promise': '../../node_modules/promised-io/promise'
+                'promised-io/promise': '../../node_modules/promised-io/promise',
+                'domReady': '../ext/domReady'
             }
         });
 
-        require(['../lib/browser', './suite'], function (browser, suite) {
+        require(['../litmus/browser', './suite'], function (browser, suite) {
             browser.run(suite.test);
         })
     </script>
