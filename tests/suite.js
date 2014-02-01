@@ -5,5 +5,6 @@ module.exports = new litmus.Suite(module, [
     require('./assertions'),
     require('./skipif'),
     require('./async'),
-    require('./events')
+    require('./events'),
+    require('./commandline')
 ]);
