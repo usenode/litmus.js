@@ -1,6 +1,6 @@
-See the <a href="http://use.no.de/litmus">Litmus Documentation</a>.
+See the <a href="http://usenode.github.io/litmus.html">Litmus Documentation</a>.
 
-Copyright (C) 2011 by <a href="http://use.no.de/contact#contributors">UseNode contributors</a> (see <a href="https://github.com/usenode/litmus/commits/master">contributions</a>).
+Copyright (C) 2014 by <a href="https://github.com/richardhodgson">Richard Hodgson</a> and <a href="https://github.com/tomyan">Tom Yandell</a>.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
